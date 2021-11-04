@@ -23,7 +23,7 @@ _Skim_ the [excellent article by Matthew Palmer](https://matthewpalmer.net/kuber
     1. http:_minikube ip_/apple ex: http://192.168.64.2/apple
     1. http:_minikube ip_/banana ex: http://192.168.64.2/banana
 1. now look carefully at the `ingress.yaml` file and cross-reference the apple.yaml and banana.yaml files to help you understand what's happening.
-1. what do you think will happen if you visit http://192.168.64.2/?. 
+1. what do you think will happen if you visit http://192.168.64.2/ ?. There are a ton of options for ingress including setting defaults.
 
 ## What is the _ingress_ resource?
 
