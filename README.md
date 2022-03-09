@@ -47,3 +47,7 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
     1. look at the changes `diff ingress.yaml ingresswtls.yaml`
     1. `kubectl apply -f ingresswtls.yaml`
 1. test with cURL `curl -kL http:_minikube ip_/apple` or run in Safari/Firefox.
+
+## Clean up
+
+1. `minikube stop && minikube delete`
