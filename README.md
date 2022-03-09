@@ -19,7 +19,7 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
     1. `brew install hyperkit`
 1. run `minikube start --driver=hyperkit` to start minikube.
 1. install the ingress controller `minikube addons enable ingress` see other addons using `minikube addons list`
-1. install the yaml files `kubectl apply -f .`
+1. install the yaml files `kubectl apply -f apple.yaml -f banana.yaml -f ingress.yaml`
 1. inspect what was created
     1. `kubectl get ns`
     1. `kubectl get all --all-namespaces`
