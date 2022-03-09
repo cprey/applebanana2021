@@ -22,7 +22,8 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
 1. install the yaml files `kubectl apply -f apple.yaml -f banana.yaml -f ingress.yaml`
 1. inspect what was created
     1. `kubectl get ns`
-    1. `kubectl get all --all-namespaces`
+    1. `kubectl get pods`
+    1. `kubectl get services`
     1. `kubectl get ingress` - this will show _ingress_ in the default namespace. Many things are not shown when you run `get all`.
     1. start logging so you can watch the action `kubectl logs -f service/ingress-nginx-controller -n ingress-nginx`
 1. get the ip from minikube `minikube ip`
