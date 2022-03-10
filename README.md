@@ -48,6 +48,32 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
     1. `kubectl apply -f ingresswtls.yaml`
 1. test with cURL `curl -kL http:_minikube ip_/apple` or run in Safari/Firefox.
 
+## Layer 4 and some Helm
+
+Is e-mail still 😎 Cool? It was a simpler time.
+
+1. create a deployment from the command line
+    * `k create deployment exim --image=circleci/exim:0.2`
+    * `k get deployments`
+1. Problem! SMTP != HTTP and it's not layer 7 - Layer 4 to the rescue
+    * `k port-forward deployment/exim 8825:25`
+    * open another terminal
+    * `nc localhost 8825`
+    * `EHLO fun.com`
+    * `MAIL FROM:<chad@prey.com>`
+    * `RCPT TO:<bob@test.com>`
+    * `DATA`
+    * type your message followed by a period (.) alone on a new line
+    * `QUIT`
+
+## Hungry for more Layer 4?
+
+1. Add the Bitnami helm repo...and install the chart *Kafka* with defaults
+    * `helm repo add bitnami https://charts.bitnami.com/bitnami`
+    * `helm install kafka bitnami/kafka`
+    * `k port-forward service/kafka-headless 9092:9092`
+    * `nc -vz localhost 9092`
+
 ## Clean up
 
 1. `minikube stop && minikube delete`
