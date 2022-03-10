@@ -48,7 +48,7 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
     1. `kubectl apply -f ingresswtls.yaml`
 1. test with cURL `curl -kL http:_minikube ip_/apple` or run in Safari/Firefox.
 
-## Layer 4 and some Helm
+## Layer 4 and a shortcut to a deployment
 
 Is e-mail still 😎 Cool? It was a simpler time.
 
@@ -65,6 +65,7 @@ Is e-mail still 😎 Cool? It was a simpler time.
     * `DATA`
     * type your message followed by a period (.) alone on a new line
     * `QUIT`
+    * we can talk about scaling by editing the exim deployment
 
 ## Hungry for more Layer 4?
 
