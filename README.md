@@ -11,13 +11,33 @@ Please bookmark [kubernetes.io](https://kubernetes.io/) as you will use it frequ
 
 Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions which are passed to the ingress controller. The ingress controller works much like any other proxy. There will be an ingress controller on every worker node that _listens_ for traffic. When you create the controller itself, it's typically deployed into it's own namespace (ingress-nginx on minikube). This has no effect on routing traffic to services in other pods.
 
-## Let's get started
+## step 0 (specific for GFM-RDE)
 
-1. clone this repo.
+1. install yum packages
+    * `sudo yum install -y docker conntrack git nc`
+1. prepare docker
+    * add user to docker group `sudo usermod -aG docker $USER`
+    * start docker `sudo systemctl start docker`
+    * log out and back in
+1. install minikube `curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/`
+1. install kubectl
+    * `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl`
+    * `chmod +x kubectl && sudo mv kubectl /usr/local/bin/`
+1. install Helm
+    * `curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3`
+    * `chmod +x get_helm.sh`
+    * `./get_helm.sh`
+1. start minikube `minikube start`
+
+## Step 0 (local OSX Intel system)
+
 1. install `hyperkit` and `minikube` - long boring story here about how OSX isn't Linux. Hyperkit is a hypervisor which runs a Linux VM.
     1. `brew install minikube`
     1. `brew install hyperkit`
 1. run `minikube start --driver=hyperkit` to start minikube.
+
+## Let's get started
+
 1. install the ingress controller `minikube addons enable ingress` see other addons using `minikube addons list`
 1. install the yaml files `kubectl apply -f apple.yaml -f banana.yaml -f ingress.yaml`
 1. inspect what was created
