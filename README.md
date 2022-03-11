@@ -13,22 +13,12 @@ Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions 
 
 ## step 0 (specific for AWS EC2)
 
-1. You will need a system with at least 2CPU and 4GB RAM. M5Large seems like a good fit. Add an SG with SSH access and access to the Internet to pull packages.
-1. install yum packages
-    * `sudo yum install -y docker conntrack git nc`
-1. prepare docker
-    * add user to docker group `sudo usermod -aG docker $USER`
-    * start docker `sudo systemctl start docker`
-    * log out and back in
-1. install minikube `curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/`
-1. install kubectl
-    * `curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl`
-    * `chmod +x kubectl && sudo mv kubectl /usr/local/bin/`
-1. install Helm
-    * `curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3`
-    * `chmod +x get_helm.sh`
-    * `./get_helm.sh`
-1. start minikube `minikube start`
+run the bash script that Ryan S. wrote...(thanks Ryan)
+
+> ⚠️ this will stop all of your docker instances.
+
+1. chmod +x rde_setup_minikube.sh
+1. ./rde_setup_minikube.sh
 
 ## Step 0 (local OSX Intel system)
 
