@@ -11,8 +11,9 @@ Please bookmark [kubernetes.io](https://kubernetes.io/) as you will use it frequ
 
 Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions which are passed to the ingress controller. The ingress controller works much like any other proxy. There will be an ingress controller on every worker node that _listens_ for traffic. When you create the controller itself, it's typically deployed into it's own namespace (ingress-nginx on minikube). This has no effect on routing traffic to services in other pods.
 
-## step 0 (specific for GFM-RDE)
+## step 0 (specific for AWS EC2)
 
+1. You will need a system with at least 2CPU and 4GB RAM. M5Large seems like a good fit. Add an SG with SSH access and access to the Internet to pull packages.
 1. install yum packages
     * `sudo yum install -y docker conntrack git nc`
 1. prepare docker
