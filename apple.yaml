@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: apple-app
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: apple
@@ -32,4 +32,5 @@ spec:
   selector:
     app: apple
   ports:
-    - port: 5678 # Default port for image
+    - port: 5678
+      targetPort: 5678

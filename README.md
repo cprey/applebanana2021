@@ -1,8 +1,48 @@
-# Learning Kubernetes ingress using _Apple-Banana_ 🍎 🍌
+# Learning Kubernetes using _Apple-Banana_ 🍎 🍌
 
 _Skim_ the [excellent article by Matthew Palmer](https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-ingress-guide-nginx-example.html) which does a good job of explaining the different ways to access resources in a :kubernetes: cluster and goes into detail on ingress.
 
-> Kubernetes moves _fast_, to illustrate, the *apiVersion: networking.k8s.io/v1* which is shown in the referenced article has changed from _beta_.
+> Kubernetes moves _fast_, to illustrate, the _apiVersion: networking.k8s.io/v1_ which is shown in the referenced article has changed from _beta_.
+
+## Prerequisites
+
+Some tool to view, edit, and interact with your K8s objects. Can be...See [https://handbook.gfm-ops.com/K8s%20Tools/tools/](handbook) for installation instructions
+
+- Loft GUI
+- OpenLens * my recommendation
+- K9s
+- Kubectl only
+
+We'll use a mix of these
+
+## Let's get started
+
+We're going to use a Loft space for this. We deliberately won't use DevSpace. We're going to do things, by hand ✋
+
+1. pull down this repo
+1. create and use your Loft space `loft create space AB-<your username>` `loft use space AB-<your username>`
+
+## Create the Apple Deployment
+
+1. look at the `apple.yaml` file. It's set up to deploy two things, a k8s `deployment` and a k8s `service`
+1. apply the `apple.yaml` file using kubectl `kubectl apply -f apple.yaml`
+1. inspect what was created
+    1. `kubectl get pods`
+    1. `kubectl get deployments`
+    1. `kubectl get services`
+1. hit the apple-service by creating a forwarded port
+    1. `kubectl port-forward service/apple-service 5678:5678` this will "take over" your terminal until you ctrl+c to stop it.
+    1. open your browser and navigate to `http://localhost:5678` or `curl http://localhost:5678`
+
+Questions:
+
+1. What are the Pod labels for the `apple` pod?
+1. How many containers are in the `apple` pod?
+1. What happens if you delete the `apple` pod?
+1. What content is returned by the `apple` pod?
+1. What does the `selector` in the `service` section of `apple.yaml` say?
+1. Challenge: change the `apple` service to listen on port 8080 and check it by creating a port forward using kubectl.
+
 
 ## What is the _ingress_ resource?
 
@@ -10,39 +50,6 @@ Please bookmark [kubernetes.io](https://kubernetes.io/) as you will use it frequ
 [kubernetes.io explains ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
 Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions which are passed to the ingress controller. The ingress controller works much like any other proxy. There will be an ingress controller on every worker node that _listens_ for traffic. When you create the controller itself, it's typically deployed into it's own namespace (ingress-nginx on minikube). This has no effect on routing traffic to services in other pods.
-
-## step 0 (specific for AWS EC2)
-
-run the bash script that Ryan S. wrote...(thanks Ryan)
-
-> ⚠️ this will stop all of your docker instances.
-
-1. chmod +x rde_setup_minikube.sh
-1. ./rde_setup_minikube.sh
-
-## Step 0 (local OSX Intel system)
-
-1. install `hyperkit` and `minikube` - long boring story here about how OSX isn't Linux. Hyperkit is a hypervisor which runs a Linux VM.
-    1. `brew install minikube`
-    1. `brew install hyperkit`
-1. run `minikube start --driver=hyperkit` to start minikube.
-
-## Let's get started
-
-1. install the ingress controller `minikube addons enable ingress` see other addons using `minikube addons list`
-1. install the yaml files `kubectl apply -f apple.yaml -f banana.yaml -f ingress.yaml`
-1. inspect what was created
-    1. `kubectl get ns`
-    1. `kubectl get pods`
-    1. `kubectl get services`
-    1. `kubectl get ingress` - this will show _ingress_ in the default namespace. Many things are not shown when you run `get all`.
-    1. start logging so you can watch the action `kubectl logs -f service/ingress-nginx-controller -n ingress-nginx`
-1. get the ip from minikube `minikube ip`
-1. hit the apple and banana resources
-    1. http:_minikube ip_/apple ex: <http://192.168.64.2/apple>
-    1. http:_minikube ip_/banana ex: <http://192.168.64.2/banana>
-1. now look carefully at the `ingress.yaml` file and cross-reference the apple.yaml and banana.yaml files to help you understand what's happening.
-1. what do you think will happen if you visit <http://192.168.64.2/> ?. There are a ton of options for ingress including setting defaults.
 
 ## Let's add some TLS to the mix
 
