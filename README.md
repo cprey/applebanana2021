@@ -2,14 +2,12 @@
 
 Review the [Kubernetes Gateway API docs](https://gateway-api.sigs.k8s.io/) which explain the Gateway API and how it replaces Ingress for routing traffic into a Kubernetes cluster.
 
-> Kubernetes moves _fast_. The Gateway API reached GA with `gateway.networking.k8s.io/v1` in Kubernetes 1.28, replacing the older `networking.k8s.io/v1` Ingress resource for advanced routing.
-
 ## Prerequisites
 
 Some tool to view, edit, and interact with your K8s objects. Can be...
 
-- OpenLens * my recommendation
-- K9s
+- OpenLens
+- K9s **recommended**
 - Kubectl only
 
 We'll use a mix of these
@@ -92,7 +90,6 @@ Questions:
 1. What content is returned by the `apple` pod?
 1. What does the `selector` in the `service` section of `apple.yaml` say?
 1. Challenge: change the `apple` service to listen on port 8080 and check it by creating a port forward using kubectl.
-
 
 ## What is the _Gateway API_?
 
