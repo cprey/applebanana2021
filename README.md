@@ -8,7 +8,6 @@ Review the [Kubernetes Gateway API docs](https://gateway-api.sigs.k8s.io/) which
 
 Some tool to view, edit, and interact with your K8s objects. Can be...
 
-- Loft GUI
 - OpenLens * my recommendation
 - K9s
 - Kubectl only
@@ -17,10 +16,61 @@ We'll use a mix of these
 
 ## Let's get started
 
-We're going to use a Loft space for this. We deliberately won't use DevSpace. We're going to do things, by hand ✋
+We're going to use **minikube** as our local Kubernetes cluster. We're going to do things by hand ✋
 
-1. pull down this repo
-1. create and use your Loft space `loft create space AB-<your username>` `loft use space AB-<your username>`
+### 1. Install minikube
+
+Follow the [official minikube installation guide](https://minikube.sigs.k8s.io/docs/start/) for your OS. You'll also need `kubectl` installed.
+
+### 2. Start minikube
+
+```bash
+minikube start
+```
+
+### 3. Install the Gateway API CRDs
+
+The Gateway API is not bundled with Kubernetes — you install the CRDs separately. Install the standard channel (which includes `Gateway` and `HTTPRoute`):
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/latest/download/standard-install.yaml
+```
+
+Verify the CRDs are installed:
+
+```bash
+kubectl get crd gateways.gateway.networking.k8s.io httproutes.gateway.networking.k8s.io
+```
+
+### 4. Install NGINX Gateway Fabric
+
+NGINX Gateway Fabric is the Gateway API implementation we use (it replaces what ingress-nginx used to do). Install it with:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/nginxinc/nginx-gateway-fabric/main/deploy/default/deploy.yaml
+```
+
+Wait for it to be ready:
+
+```bash
+kubectl wait --namespace nginx-gateway \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/name=nginx-gateway \
+  --timeout=90s
+```
+
+Verify a `GatewayClass` named `nginx` was created:
+
+```bash
+kubectl get gatewayclass
+```
+
+### 5. Pull down this repo and get started
+
+```bash
+git clone <repo-url>
+cd applebanana2021
+```
 
 ## Create the Apple Deployment
 
@@ -86,8 +136,10 @@ The Kubernetes community has signaled that Gateway API is the long-term successo
 
 1. create a self-signed TLS cert for _laptop.int_
     1. `openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=laptop.int/O=gatewaysvc"`
-1. create an `/etc/hosts` entry for _laptop.int_
-    * 192.168.64.2  laptop.int
+1. create an `/etc/hosts` entry for _laptop.int_ — get your minikube IP first:
+    1. `minikube ip` — copy the output (e.g. `192.168.49.2`)
+    1. add a line to `/etc/hosts`: `<minikube-ip>  laptop.int`
+    * On Mac/Linux: `echo "$(minikube ip)  laptop.int" | sudo tee -a /etc/hosts`
 1. add the certificate to the secrets manager in kubernetes
     1. `kubectl create secret tls tls-secret --key tls.key --cert tls.crt`
 1. apply `gateway.yaml` which creates both the Gateway (with TLS termination) and the HTTPRoute
@@ -104,3 +156,4 @@ The Kubernetes community has signaled that Gateway API is the long-term successo
 1. `kubectl delete -f apple.yaml`
 1. `kubectl delete -f banana.yaml`
 1. `kubectl delete secret tls-secret`
+1. `minikube stop && minikube delete`
