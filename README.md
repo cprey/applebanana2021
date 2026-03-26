@@ -1,12 +1,12 @@
 # Learning Kubernetes using _Apple-Banana_ 🍎 🍌
 
-_Skim_ the [excellent article by Matthew Palmer](https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-ingress-guide-nginx-example.html) which does a good job of explaining the different ways to access resources in a :kubernetes: cluster and goes into detail on ingress.
+Review the [Kubernetes Gateway API docs](https://gateway-api.sigs.k8s.io/) which explain the Gateway API and how it replaces Ingress for routing traffic into a Kubernetes cluster.
 
-> Kubernetes moves _fast_, to illustrate, the _apiVersion: networking.k8s.io/v1_ which is shown in the referenced article has changed from _beta_.
+> Kubernetes moves _fast_. The Gateway API reached GA with `gateway.networking.k8s.io/v1` in Kubernetes 1.28, replacing the older `networking.k8s.io/v1` Ingress resource for advanced routing.
 
 ## Prerequisites
 
-Some tool to view, edit, and interact with your K8s objects. Can be...See [https://handbook.gfm-ops.com/K8s%20Tools/tools/](handbook) for installation instructions
+Some tool to view, edit, and interact with your K8s objects. Can be...
 
 - Loft GUI
 - OpenLens * my recommendation
@@ -44,28 +44,63 @@ Questions:
 1. Challenge: change the `apple` service to listen on port 8080 and check it by creating a port forward using kubectl.
 
 
-## What is the _ingress_ resource?
+## What is the _Gateway API_?
 
-Please bookmark [kubernetes.io](https://kubernetes.io/) as you will use it frequently. You may also wish to add the CNCF Slack #argoCD and #kubernetes channels.
-[kubernetes.io explains ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+Please bookmark [kubernetes.io](https://kubernetes.io/) as you will use it frequently. You may also wish to add the CNCF Slack #gateway-api and #kubernetes channels.
 
-Ingress works at TCP/IP layer 7, ingress is a set of configuration instructions which are passed to the ingress controller. The ingress controller works much like any other proxy. There will be an ingress controller on every worker node that _listens_ for traffic. When you create the controller itself, it's typically deployed into it's own namespace (ingress-nginx on minikube). This has no effect on routing traffic to services in other pods.
+[kubernetes.io explains the Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/)
+
+The Gateway API works at TCP/IP layer 7. It is a set of CRDs (Custom Resource Definitions) that define how traffic enters a Kubernetes cluster. The key resources are:
+
+- **GatewayClass** — defines the type of gateway (provisioned by your infrastructure, e.g. nginx)
+- **Gateway** — represents a deployed gateway instance with one or more listeners (HTTP, HTTPS, etc.)
+- **HTTPRoute** — defines routing rules that map hostnames and paths to backend services
+
+The Gateway API is more expressive and role-oriented than the older Ingress resource, supporting TLS termination, path-based routing, and more — all without controller-specific annotations.
+
+### Why we moved from ingress-nginx to Gateway API
+
+**What ingress-nginx was**
+
+ingress-nginx was (and still is) a widely-used Ingress controller. It watched for `networking.k8s.io/v1 Ingress` resources and configured an nginx reverse proxy to route external traffic to services inside the cluster. It worked well for simple cases, but any behavior beyond basic path routing — timeouts, retries, traffic splitting, header manipulation — had to be expressed through nginx-specific annotations like `nginx.ingress.kubernetes.io/proxy-read-timeout`. That tied your config tightly to one controller. Swap to a different Ingress controller and your annotations silently stop working.
+
+**The problem with the Ingress resource**
+
+The `Ingress` resource was intentionally kept minimal by Kubernetes. There was never a standard way to express advanced routing in the spec itself, so every controller invented its own annotation vocabulary. The result: non-portable YAML, inconsistent behavior across environments, and a growing gap between what teams actually needed and what the API provided.
+
+**Why Gateway API**
+
+| | ingress-nginx | Gateway API |
+|---|---|---|
+| API group | `networking.k8s.io/v1` (core, minimal) | `gateway.networking.k8s.io/v1` (CRD, expressive) |
+| Advanced routing | Controller-specific annotations | Native spec fields |
+| Portability | Tied to nginx controller | Works with nginx, Istio, Envoy, Cilium, and more |
+| Role separation | Single resource owned by app teams | `GatewayClass`/`Gateway` for infra, `HTTPRoute` for apps |
+| Status | Effectively frozen | Actively developed, GA in Kubernetes 1.28 |
+
+The Kubernetes community has signaled that Gateway API is the long-term successor to Ingress. Migrating now means writing YAML that is portable across gateway implementations, supported by all major service mesh and CNI projects, and backed by a stable, versioned API.
 
 ## Let's add some TLS to the mix
 
-> NOTE: Google Chrome went a little 🙀 and won't allow self-signed certificates any longer. As of writing, Firefox and Safari will both work by adding exceptions. Use Firefox or Safari to load these pages in a web browser.
+> NOTE: Google Chrome won't allow self-signed certificates. As of writing, Firefox and Safari will both work by adding exceptions. Use Firefox or Safari to load these pages in a web browser.
 
 1. create a self-signed TLS cert for _laptop.int_
-    1. `openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=laptop.int/O=nginxsvc"`
+    1. `openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=laptop.int/O=gatewaysvc"`
 1. create an `/etc/hosts` entry for _laptop.int_
     * 192.168.64.2  laptop.int
 1. add the certificate to the secrets manager in kubernetes
     1. `kubectl create secret tls tls-secret --key tls.key --cert tls.crt`
-1. reapply the ingress.yaml with tls added.
-    1. look at the changes `diff ingress.yaml ingresswtls.yaml`
-    1. `kubectl apply -f ingresswtls.yaml`
-1. test with cURL `curl -kL http:_minikube ip_/apple` or run in Safari/Firefox.
+1. apply `gateway.yaml` which creates both the Gateway (with TLS termination) and the HTTPRoute
+    1. look at the file: `cat gateway.yaml`
+    1. `kubectl apply -f gateway.yaml`
+1. verify what was created
+    1. `kubectl get gateway`
+    1. `kubectl get httproute`
+1. test with cURL `curl -kL https://laptop.int/apple` or open in Safari/Firefox.
 
 ## Clean up
 
-1. `minikube stop && minikube delete`
+1. `kubectl delete -f gateway.yaml`
+1. `kubectl delete -f apple.yaml`
+1. `kubectl delete -f banana.yaml`
+1. `kubectl delete secret tls-secret`
